@@ -427,9 +427,9 @@
   ];
   // room tint [r, g, b, alpha] over the whole office
   const TINT = [
-    [0, [12, 22, 78, 0.38]], [4.5, [12, 22, 78, 0.38]], [5.5, [120, 80, 140, 0.25]], [6.5, [255, 160, 110, 0.14]],
+    [0, [10, 18, 70, 0.46]], [4.5, [10, 18, 70, 0.46]], [5.5, [120, 80, 140, 0.25]], [6.5, [255, 160, 110, 0.14]],
     [8, [255, 255, 255, 0]], [16, [255, 255, 255, 0]], [17.5, [255, 150, 70, 0.14]], [18.5, [120, 70, 110, 0.25]],
-    [19.5, [12, 22, 78, 0.36]], [21, [12, 22, 78, 0.38]], [24, [12, 22, 78, 0.38]],
+    [19.5, [10, 18, 70, 0.42]], [21, [10, 18, 70, 0.46]], [24, [10, 18, 70, 0.46]],
   ];
   function sample(keys, h, blend) {
     for (let i = 0; i < keys.length - 1; i++) {
@@ -583,6 +583,35 @@
     }
   }
 
+  // Night focus: an extra dark layer with a soft stepped hole around the main desk, plus a warm
+  // ceiling-light pool on the floor, so the eye goes straight to the workstation.
+  let darkLayer = null;
+  function drawNightFocus(k) {
+    if (k < 0.02) return;
+    if (!darkLayer) { darkLayer = document.createElement('canvas'); darkLayer.width = W; darkLayer.height = H; }
+    const dg = darkLayer.getContext('2d');
+    const cx = MAIN_DESK.x + 16, cy = MAIN_DESK.y + 16;
+    const ell = (g, rx, ry, color) => {
+      g.fillStyle = color;
+      for (let dy = -ry; dy <= ry; dy++) {
+        const half = Math.round(rx * Math.sqrt(1 - (dy / ry) ** 2));
+        g.fillRect(Math.round(cx - half), Math.round(cy + dy), half * 2, 1);
+      }
+    };
+    dg.globalCompositeOperation = 'source-over';
+    dg.clearRect(0, 0, W, H);
+    dg.fillStyle = 'rgba(3,6,28,' + (0.34 * k).toFixed(3) + ')';
+    dg.fillRect(0, 0, W, H);
+    dg.globalCompositeOperation = 'destination-out';
+    for (const [rx, ry, a] of [[92, 58, 0.25], [76, 48, 0.3], [60, 38, 0.35], [44, 28, 0.5], [30, 19, 0.8]]) {
+      ell(dg, rx, ry, 'rgba(0,0,0,' + a + ')');
+    }
+    wg.drawImage(darkLayer, 0, 0);
+    for (const [rx, ry, a] of [[56, 34, 0.04], [42, 26, 0.05], [30, 19, 0.06], [18, 12, 0.07]]) {
+      ell(wg, rx, ry, 'rgba(255,226,160,' + (a * k).toFixed(3) + ')');
+    }
+  }
+
   function render(now) {
     wg.drawImage(bg, 0, 0);
     Cats.drawFloor(clk.dec);
@@ -630,6 +659,7 @@
     // time of day: tint the whole room, then the (always bright) windows and the wall clock on top
     const [tr, tg, tb, ta] = sample(TINT, clk.dec, blendTint);
     if (ta > 0.005) { wg.fillStyle = `rgba(${Math.round(tr)},${Math.round(tg)},${Math.round(tb)},${ta.toFixed(3)})`; wg.fillRect(0, 0, W, H); }
+    drawNightFocus(clamp01((ta - 0.1) / 0.3));             // darker room, lit around Claude's workstation
     for (const { d } of desks) drawLampGlow(d, lampLevel(clk.dec));   // lamp light shines through the night tint
     drawWindows(now, clk.dec);
     drawClock();
