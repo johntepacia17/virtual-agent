@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pixel Office</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>PIXEL OFFICE</h1>
+    <nav id="tabs"></nav>
+    <div id="clock"><span id="clock-time"></span><span id="clock-phase"></span></div>
+    <span id="conn" class="off">offline</span>
+  </header>
+  <main>
+    <div id="stage"><canvas id="screen"></canvas></div>
+    <aside>
+      <h2>CATS</h2>
+      <div id="tools" title="Click a cat to pet it. FEED / TOY then click the floor.">
+        <button data-tool="pet" class="active">PET</button>
+        <button data-tool="feed">FEED</button>
+        <button data-tool="toy">TOY</button>
+      </div>
+      <ul id="roster"></ul>
+      <h2>ACTIVITY</h2>
+      <ul id="log"></ul>
+    </aside>
+  </main>
+  <script src="sprites.js"></script>
+  <script src="cats.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
